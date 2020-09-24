@@ -105,8 +105,8 @@ class _MyAppState extends State<MyApp> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  _buildTitleSection('语音交互'),
-                  _buildTitleSection('语音应答内容 ==>$_speakContext'),
+                  _buildTitleSection('监听结果'),
+                  _buildTitleSection('$_speakContext'),
                 ],
               ),
             ),
@@ -256,6 +256,13 @@ class _MyAppState extends State<MyApp> {
             child:Text('嘴巴张合'),
             onPressed: (){
               FlutterAvatar.instance.avatarSpeechMouth('1');
+            },
+          ),
+
+          RaisedButton(
+            child:Text('设置拖拽模式'),
+            onPressed: (){
+              FlutterAvatar.instance.avatarSwitchDragMode(isDragMode: true);
             },
           ),
 

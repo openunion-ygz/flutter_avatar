@@ -147,7 +147,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             result.success(avatarChangePos(call));
         } else if (call.method.equals("avatarSpeak")) {
             result.success(avatarSpeak(call));
-        } else {
+        }else if (call.method.equals("avatarSwitchDragMode")){
+            result.success(avatarSwitchDragMode(call));
+        }
+        else {
             result.notImplemented();
         }
     }
@@ -192,7 +195,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         mAvatarMgr.setEventListener(new AvatarManagerHelper.AvatarEventListen() {
             @Override
             public void onEvent(final String strJson) {
-                Log.e("onEvent ====>", strJson);
+                Log.e("FlutterAvatarPlugin onEvent====>", strJson);
                 /**
                  * {
                  * "head": { //事件头
@@ -217,12 +220,13 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     if ("Event4ModuleLoaded".equals(eventName)) {
                         //{"body":{"curModule":"AVATAR","curStatus":"1","curSubmodule":"BODY","failed":"0","progress":"100"},"head":{"name":"Event4ModuleLoaded","time":"2020-09-22 13:35:47","ver":"I.001"}}
                         //启动事件监听
-                        final String progress = jsonObjectBody.getString("progress");
+                        String progress = jsonObjectBody.getString("progress");
                         if (Integer.parseInt(progress) == 100) {
+                            final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"0\",\"progress\":\"100\"}";
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    eventSink.success(progress);
+                                    eventSink.success(initResult);
                                     eventSink.endOfStream();
                                     Toast.makeText(mContext, "虚拟机器人初始化完成", Toast.LENGTH_SHORT).show();
                                 }
@@ -241,8 +245,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                         event4VoiceParseMap.put(Constants.Event4VoiceParsed_ORGTEXT_KEY, orgtext);
                         event4VoiceParseMap.put(Constants.Event4VoiceParsed_PARAM_KEY, param);
                         final String result = JSON.toJSONString(event4VoiceParseMap);
-
-                        Log.e("result ====>", result);
+                        Log.e("FlutterAvatarPlugin event4VoicePars ====>", result);
                         if (!orgtext.isEmpty() && !param.isEmpty()) {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
@@ -276,8 +279,12 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         isInit = false;
         if (mAvatarMgr != null) {
             mAvatarMgr.UnInitialize();
+            mAvatarMgr = null;
             return true;
         } else {
+            mAvatarMgr = new AvatarManagerHelper(activity);
+            mAvatarMgr.UnInitialize();
+            mAvatarMgr = null;
             return false;
         }
     }
@@ -387,6 +394,21 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             int iLeft = Integer.parseInt(iLeftStr);
             int iTop = Integer.parseInt(iTopStr);
             mAvatarMgr.switch2TowardTo(iLeft, iTop);
+            return true;
+        } else {
+            if (!isInitializing) {
+                initialize();
+            }
+            Toast.makeText(mContext, "正在初始化，请稍后", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    }
+    //允许机器人在手机屏幕拖拽
+    private boolean avatarSwitchDragMode(MethodCall call){
+        //dragMode
+        if (mAvatarMgr != null && isInit) {
+            boolean isDragMode = call.argument("dragMode");
+            mAvatarMgr.switchDragMode(isDragMode);
             return true;
         } else {
             if (!isInitializing) {

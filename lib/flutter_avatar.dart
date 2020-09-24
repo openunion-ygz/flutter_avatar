@@ -23,6 +23,9 @@ class FlutterAvatar {
 
   static FlutterAvatar get instance => _instance;
   ///初始化
+  /// iLeft 机器人初始位置距离屏幕左侧的尺寸，为int的String值
+  ///  iTop 机器人初始位置距离屏幕顶部的尺寸，为int的String值
+  ///  iAvatarSize 机器人的大小尺寸，为int的String值
   void initAvatar(String iLeft,String iTop,{String iAvatarSize = '200'}){
     Map<String, dynamic> initConfigMap = new Map();
     initConfigMap['iLeft'] = iLeft;
@@ -52,6 +55,7 @@ class FlutterAvatar {
         .then<bool>((isStop) => isStop);
   }
   ///智能机器人动作
+  ///action 具体的动作名称，传入的参数为AvatarAction类中的常量值
   Future<bool> avatarActions({String action = AvatarAction.INTERACTION}){
     Map<String, dynamic> actionsMap = new Map();
     actionsMap['action'] = action;
@@ -61,6 +65,7 @@ class FlutterAvatar {
   }
 
   ///智能机器人表情
+  ///emotion 具体的表情名称，传入的参数为AvatarEmotions类中的常量值
   Future<bool> avatarExpression({String emotion = AvatarEmotions.CALM}){
     Map<String, dynamic> emotionsMap = new Map();
     emotionsMap['emotion'] = emotion;
@@ -70,6 +75,7 @@ class FlutterAvatar {
   }
 
   ///智能机器人张嘴/合嘴动作
+  ///speechMouth 传入“1” 表示张嘴，“0”表示合嘴
   Future<bool> avatarSpeechMouth(String speechMouth){
     Map<String, dynamic> speechMouthMap = new Map();
     speechMouthMap['speechMouth'] = speechMouth;
@@ -79,6 +85,8 @@ class FlutterAvatar {
   }
 
   ///改变智能机器人脸部朝向
+  ///fTurnX 水平方向位置，取值[-1, 1]
+  ///fTurnY 垂直方向位置，取值[-1, 1]
   Future<bool> avatarTowardTo(String fTurnX,String fTurnY){
     Map<String, dynamic> towardToMap = new Map();
     towardToMap['fTurnX'] = fTurnX;
@@ -89,6 +97,8 @@ class FlutterAvatar {
   }
 
   ///改变智能机器人在屏幕的位置
+  /// iLeft 机器人初始位置距离屏幕左侧的尺寸，为int的String值
+  /// iTop 机器人初始位置距离屏幕顶部的尺寸，为int的String值
   Future<bool> avatarChangePos(String iLeft,String iTop){
     Map<String, dynamic> posMap = new Map();
     posMap['iLeft'] = iLeft;
@@ -99,11 +109,21 @@ class FlutterAvatar {
   }
 
   ///智能机器人说话
+  ///speakContext 控制机器人说话的内容
   Future<bool> avatarSpeak({String speakContext = '您好，我是小美，请问有什么可以效劳？'}){
     Map<String, dynamic> speakMap = new Map();
     speakMap['speakContext'] = speakContext;
     return _channel
         .invokeMethod('avatarSpeak',speakMap)
+        .then<bool>((isDone) => isDone);
+  }
+
+  ///允许智能机器人在手机屏幕拖拽（默认不允许拖拽）
+  Future<bool> avatarSwitchDragMode({bool isDragMode = false}){
+    Map<String,dynamic> dragModeMap = new Map();
+    dragModeMap['dragMode'] = isDragMode;
+    return _channel
+        .invokeMethod('avatarSwitchDragMode',dragModeMap)
         .then<bool>((isDone) => isDone);
   }
 
