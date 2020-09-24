@@ -1,0 +1,40 @@
+group 'com.opun.flutter_avatar'
+version '1.0'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 30
+
+    defaultConfig {
+        minSdkVersion 24
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
+
+
+    dependencies {
+        implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
+        implementation 'com.alibaba:fastjson:1.2.31'
+    }
+}
