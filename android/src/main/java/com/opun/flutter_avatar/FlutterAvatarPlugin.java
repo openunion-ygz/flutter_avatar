@@ -81,6 +81,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
+        mContext = activity.getApplication();
     }
 
     @Override
@@ -99,7 +100,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     }
 
     public static void registerWith(Registrar registrar) {
-//        activity = registrar.activity();
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
         channel.setMethodCallHandler(new FlutterAvatarPlugin());
         //1.渠道名
