@@ -235,6 +235,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                     eventSink.success(initResult);
                                     eventSink.endOfStream();
                                 }
+                                unInitialize();
                             }
                         });
 
