@@ -64,6 +64,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         mContext = flutterPluginBinding.getApplicationContext();
         //1.渠道名
         EventChannel eventChannel = new EventChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "listener");
+       /*
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object o, EventChannel.EventSink sink) {
@@ -77,6 +78,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 //                eventSink = null;
             }
         };
+        */
         eventChannel.setStreamHandler(streamHandler);
         Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
     }
@@ -101,13 +103,25 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     }
 
+    private static final EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
+        @Override
+        public void onListen(Object arguments, EventChannel.EventSink events) {
+            eventSink = events;
+        }
+        @Override
+        public void onCancel(Object arguments) {
+
+        }
+    };
+
     public static void registerWith(Registrar registrar) {
         mRegistrar = registrar;
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
         channel.setMethodCallHandler(new FlutterAvatarPlugin());
-        /*
+
         //1.渠道名
         EventChannel eventChannel = new EventChannel(registrar.messenger(), "listener");
+         /*
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object o, EventChannel.EventSink sink) {
@@ -121,8 +135,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 //                eventSink = null;
             }
         };
+         */
         eventChannel.setStreamHandler(streamHandler);
-        */
+
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
         activity = registrar.activity();
