@@ -59,9 +59,8 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutter_avatar");
         channel.setMethodCallHandler(this);
+        //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = flutterPluginBinding.getApplicationContext();
-        Log.e("onAttachedToEngine ===>","mContext==null ===>"+(mContext==null));
-
         //1.渠道名
         EventChannel eventChannel = new EventChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "listener");
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
@@ -82,8 +81,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
-        mContext = activity.getApplication();
-        Log.e("onAttachedToActivity ===>","activity == null ===>"+(activity == null)+"mContext ==null ===>"+(mContext == null));
     }
 
     @Override
@@ -119,14 +116,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             }
         };
         eventChannel.setStreamHandler(streamHandler);
+        //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
         activity = registrar.activity();
-
-        Log.e("registerWith ===>", "registrar.context() == null ===>"+(registrar.context() == null));
-        Log.e("registerWith ===>", "mContext == null ===>"+(mContext == null));
-        Log.e("registerWith ===>", "activity == null ===>"+(activity == null));
-
-
     }
 
     @Override
