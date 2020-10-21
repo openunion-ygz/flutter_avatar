@@ -68,7 +68,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
-                Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
+                Log.e("onAttachedToEngine ===>1",(eventSink == null)+"");
             }
 
             @Override
@@ -77,6 +77,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             }
         };
         eventChannel.setStreamHandler(streamHandler);
+        Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
     }
 
     @Override
@@ -109,7 +110,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
-                Log.e("registerWith ===>",(eventSink == null)+"");
+                Log.e("registerWith ===>1",(eventSink == null)+"");
             }
 
             @Override
@@ -121,6 +122,8 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
         activity = registrar.activity();
+
+        Log.e("registerWith ===>2",(eventSink == null)+"");
     }
 
     @Override
