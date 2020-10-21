@@ -54,6 +54,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     private int mAvatarPosTop = 0;
     private int mAvatarSize = 0;
     private boolean isInitializing = false;
+    private static Registrar mRegistrar;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -101,8 +102,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     }
 
     public static void registerWith(Registrar registrar) {
+        mRegistrar = registrar;
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
         channel.setMethodCallHandler(new FlutterAvatarPlugin());
+        /*
         //1.渠道名
         EventChannel eventChannel = new EventChannel(registrar.messenger(), "listener");
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
@@ -119,6 +122,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             }
         };
         eventChannel.setStreamHandler(streamHandler);
+        */
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
         activity = registrar.activity();
@@ -191,6 +195,25 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     }
 
     private void avatarManagerInit() {
+        if (eventSink == null){
+            //1.渠道名
+            EventChannel eventChannel = new EventChannel(mRegistrar.messenger(), "listener");
+            EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
+                @Override
+                public void onListen(Object o, EventChannel.EventSink sink) {
+                    //2.发射器
+                    eventSink = sink;
+                    Log.e("avatarManagerInit ===>1",(eventSink == null)+"");
+                }
+
+                @Override
+                public void onCancel(Object o) {
+//                eventSink = null;
+                }
+            };
+            eventChannel.setStreamHandler(streamHandler);
+        }
+
         if (isCheckPermission && isInit) {
             Toast.makeText(mContext, "初始化已完成", Toast.LENGTH_SHORT).show();
             return;
