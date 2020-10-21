@@ -64,7 +64,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         mContext = flutterPluginBinding.getApplicationContext();
         //1.渠道名
         EventChannel eventChannel = new EventChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "listener");
-       /*
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object o, EventChannel.EventSink sink) {
@@ -78,7 +77,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 //                eventSink = null;
             }
         };
-        */
         eventChannel.setStreamHandler(streamHandler);
         Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
     }
@@ -103,31 +101,17 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     }
 
-    private static final EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
-        @Override
-        public void onListen(Object arguments, EventChannel.EventSink events) {
-            eventSink = events;
-        }
-        @Override
-        public void onCancel(Object arguments) {
-
-        }
-    };
-
     public static void registerWith(Registrar registrar) {
         mRegistrar = registrar;
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
         channel.setMethodCallHandler(new FlutterAvatarPlugin());
-
         //1.渠道名
         EventChannel eventChannel = new EventChannel(registrar.messenger(), "listener");
-         /*
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
-                Log.e("registerWith ===>1",(eventSink == null)+"");
             }
 
             @Override
@@ -135,14 +119,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 //                eventSink = null;
             }
         };
-         */
         eventChannel.setStreamHandler(streamHandler);
-
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
         activity = registrar.activity();
-
-        Log.e("registerWith ===>2",(eventSink == null)+"");
     }
 
     @Override
@@ -210,25 +190,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     }
 
     private void avatarManagerInit() {
-        if (eventSink == null){
-            //1.渠道名
-            EventChannel eventChannel = new EventChannel(mRegistrar.messenger(), "listener");
-            EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
-                @Override
-                public void onListen(Object o, EventChannel.EventSink sink) {
-                    //2.发射器
-                    eventSink = sink;
-                    Log.e("avatarManagerInit ===>1",(eventSink == null)+"");
-                }
-
-                @Override
-                public void onCancel(Object o) {
-//                eventSink = null;
-                }
-            };
-            eventChannel.setStreamHandler(streamHandler);
-        }
-
         if (isCheckPermission && isInit) {
             Toast.makeText(mContext, "初始化已完成", Toast.LENGTH_SHORT).show();
             return;
@@ -270,8 +231,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                eventSink.success(initResult);
-                                eventSink.endOfStream();
+                                if (eventSink != null){
+                                    eventSink.success(initResult);
+                                    eventSink.endOfStream();
+                                }
                             }
                         });
 
@@ -310,16 +273,20 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    eventSink.success(result);
-                                    eventSink.endOfStream();
+                                    if (eventSink != null){
+                                        eventSink.success(result);
+                                        eventSink.endOfStream();
+                                    }
                                 }
                             });
                         } else {
                             activity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
-                                    eventSink.endOfStream();
+                                    if (eventSink != null){
+                                        eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
+                                        eventSink.endOfStream();
+                                    }
                                 }
                             });
                         }

@@ -31,6 +31,7 @@ class FlutterAvatar {
     initConfigMap['iLeft'] = iLeft;
     initConfigMap['iTop'] = iTop;
     initConfigMap['iAvatarSize'] = iAvatarSize;
+    _avatarListenerChannel.receiveBroadcastStream();
     _channel.invokeListMethod('initialize',initConfigMap);
   }
 
