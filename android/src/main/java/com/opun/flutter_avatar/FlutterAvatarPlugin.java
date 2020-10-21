@@ -68,6 +68,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
+                Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
             }
 
             @Override
@@ -108,6 +109,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
+                Log.e("registerWith ===>",(eventSink == null)+"");
             }
 
             @Override
@@ -460,8 +462,8 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     if (mPermissionList != null) {
                         mPermissionList.remove(0);
                         if (mPermissionList.isEmpty()) {
-                            avatarManagerInit();
                             isCheckPermission = true;
+                            avatarManagerInit();
                             return true;
                         }
                     }
