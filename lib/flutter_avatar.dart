@@ -17,6 +17,7 @@ class FlutterAvatar {
 
   FlutterAvatar._() {
     // initAvatar();
+    //在原生中注册的事件通知通道也必须要在flutter注册，否则会通道对象无法实例化。
     _avatarListenerChannel.receiveBroadcastStream();
   }
 
