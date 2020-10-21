@@ -46,7 +46,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     private boolean isCheckPermission = false;
     private List<String> mPermissionList;
     private AvatarManagerHelper mAvatarMgr;
-    private Context mContext;
+    private static Context mContext;
     private static Activity activity;
     public static final int REQUEST_CODE_PERMISSION = 10011;
     private boolean isInit = false;
@@ -60,6 +60,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "flutter_avatar");
         channel.setMethodCallHandler(this);
         mContext = flutterPluginBinding.getApplicationContext();
+        Log.e("onAttachedToEngine ===>","mContext==null ===>"+(mContext==null));
 
         //1.渠道名
         EventChannel eventChannel = new EventChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "listener");
@@ -82,6 +83,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
         mContext = activity.getApplication();
+        Log.e("onAttachedToActivity ===>","activity == null ===>"+(activity == null)+"mContext ==null ===>"+(mContext == null));
     }
 
     @Override
@@ -117,6 +119,14 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             }
         };
         eventChannel.setStreamHandler(streamHandler);
+        mContext = registrar.activeContext();
+        activity = registrar.activity();
+
+        Log.e("registerWith ===>", "registrar.context() == null ===>"+(registrar.context() == null));
+        Log.e("registerWith ===>", "mContext == null ===>"+(mContext == null));
+        Log.e("registerWith ===>", "activity == null ===>"+(activity == null));
+
+
     }
 
     @Override
