@@ -69,7 +69,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             public void onListen(Object o, EventChannel.EventSink sink) {
                 //2.发射器
                 eventSink = sink;
-                Log.e("onAttachedToEngine ===>1",(eventSink == null)+"");
             }
 
             @Override
@@ -78,7 +77,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             }
         };
         eventChannel.setStreamHandler(streamHandler);
-        Log.e("onAttachedToEngine ===>",(eventSink == null)+"");
     }
 
     @Override
@@ -221,26 +219,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     String bodyJsonStr = jsonObject.getString("body");
                     jsonObjectEvent = new JSONObject(eventNameJsonStr);
                     jsonObjectBody = new JSONObject(bodyJsonStr);
-                    String authorResult = jsonObjectBody.getString("authorResult");
                     String eventName = jsonObjectEvent.getString("name");
-                    // {"body":{"authorInfo":"Authorization from Cloud...FAILED && Authorization from license file: FAILED","authorResult":"FAILED","productSN":"2E8AF13B-8D87-523B-99D1-0B1F61C9C353"},"head":{"name":"Event4AuthorizationInfo","time":"2020-10-20 14:36:37","ver":"I.001"}}
-                    if ("FAILED".equals(authorResult)) {
-                        isInit = false;
-                        isInitializing = false;
-                        final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"100\",\"failedMsg\":\"初始化异常，请检查是否安装智能机器人app\",\"progress\":\"0\"}";
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (eventSink != null){
-                                    eventSink.success(initResult);
-                                    eventSink.endOfStream();
-                                }
-                                unInitialize();
-                            }
-                        });
-
-                    }
-
                     if ("Event4ModuleLoaded".equals(eventName)) {
                         //{"body":{"curModule":"AVATAR","curStatus":"1","curSubmodule":"BODY","failed":"0","progress":"100"},"head":{"name":"Event4ModuleLoaded","time":"2020-09-22 13:35:47","ver":"I.001"}}
                         //启动事件监听
@@ -290,6 +269,25 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                     }
                                 }
                             });
+                        }
+                    }else if ("Event4AuthorizationInfo".equals(eventName)){
+                        // {"body":{"authorInfo":"Authorization from Cloud...FAILED && Authorization from license file: FAILED","authorResult":"FAILED","productSN":"2E8AF13B-8D87-523B-99D1-0B1F61C9C353"},"head":{"name":"Event4AuthorizationInfo","time":"2020-10-20 14:36:37","ver":"I.001"}}
+                        String authorResult = jsonObjectBody.getString("authorResult");
+                        if ("FAILED".equals(authorResult)) {
+                            isInit = false;
+                            isInitializing = false;
+                            final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"100\",\"failedMsg\":\"初始化异常，请检查是否安装智能机器人app\",\"progress\":\"0\"}";
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (eventSink != null){
+                                        eventSink.success(initResult);
+                                        eventSink.endOfStream();
+                                    }
+                                    unInitialize();
+                                }
+                            });
+
                         }
                     }
                 } catch (JSONException e) {
