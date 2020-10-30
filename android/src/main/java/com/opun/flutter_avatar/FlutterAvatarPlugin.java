@@ -48,14 +48,14 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     private List<String> mPermissionList;
     private AvatarManagerHelper mAvatarMgr;
     private static Context mContext;
-    private static Activity activity;
+    private Activity activity;
     public static final int REQUEST_CODE_PERMISSION = 10011;
     private boolean isInit = false;
     private int mAvatarPosLeft = 0;
     private int mAvatarPosTop = 0;
     private int mAvatarSize = 0;
     private boolean isInitializing = false;
-    private static Registrar mRegistrar;
+//    private static Registrar mRegistrar;
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
@@ -101,9 +101,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     }
 
     public static void registerWith(Registrar registrar) {
-        mRegistrar = registrar;
+//        mRegistrar = registrar;
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
-        channel.setMethodCallHandler(new FlutterAvatarPlugin());
+        final FlutterAvatarPlugin plugin = new FlutterAvatarPlugin();
+        channel.setMethodCallHandler(plugin);
         //1.渠道名
         EventChannel eventChannel = new EventChannel(registrar.messenger(), "listener");
         EventChannel.StreamHandler streamHandler = new EventChannel.StreamHandler() {
@@ -121,7 +122,13 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         eventChannel.setStreamHandler(streamHandler);
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
         mContext = registrar.activeContext();
-        activity = registrar.activity();
+//        activity = registrar.activity();
+        if (registrar.activeContext() instanceof Activity){
+            plugin.setActivity(registrar.activity());
+        }
+    }
+    private void setActivity(Activity activity){
+        this.activity = activity;
     }
 
     @Override
@@ -192,8 +199,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                 int accessNetStatePermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_NETWORK_STATE);
                 if (writePermission != PackageManager.PERMISSION_GRANTED || readPermission != PackageManager.PERMISSION_GRANTED ||
                         internetPermission != PackageManager.PERMISSION_GRANTED || accessNetStatePermission != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(activity, permissions, REQUEST_CODE_PERMISSION);
-                    Log.e("requestPermissions ===>",permissions.length+"");
+                    String[] mPermissions = mPermissionList.toArray(new String[mPermissionList.size()]);
+                    ActivityCompat.requestPermissions(activity, mPermissions, REQUEST_CODE_PERMISSION);
+                    Log.e("requestPermissions ===>",mPermissions.length+"");
                 } else {
                     isCheckPermission = true;
                     avatarManagerInit();
