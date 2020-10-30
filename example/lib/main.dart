@@ -149,18 +149,18 @@ class _MyAppState extends State<MyApp> {
               });
             },
           ),
-          RaisedButton(
-            child:Text('启动'),
-            onPressed: (){
-              FlutterAvatar.instance.avatarStart();
-            },
-          ),
-          RaisedButton(
-            child:Text('停止'),
-            onPressed: (){
-              FlutterAvatar.instance.avatarStop();
-            },
-          ),
+          // RaisedButton(
+          //   child:Text('启动'),
+          //   onPressed: (){
+          //     FlutterAvatar.instance.avatarStart();
+          //   },
+          // ),
+          // RaisedButton(
+          //   child:Text('停止'),
+          //   onPressed: (){
+          //     FlutterAvatar.instance.avatarStop();
+          //   },
+          // ),
           RaisedButton(
             child:Text('释放资源'),
             onPressed: (){

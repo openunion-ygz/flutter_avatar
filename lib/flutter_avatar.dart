@@ -44,18 +44,18 @@ class FlutterAvatar {
   }
 
   ///显示智能机器人
-  Future<bool> avatarStart(){
-    return _channel
-        .invokeMethod('avatarStart')
-        .then<bool>((isStart) => isStart);
-  }
+  // Future<bool> avatarStart(){
+  //   return _channel
+  //       .invokeMethod('avatarStart')
+  //       .then<bool>((isStart) => isStart);
+  // }
 
   ///隐藏智能机器人
-  Future<bool> avatarStop(){
-    return _channel
-        .invokeMethod('avatarStop')
-        .then<bool>((isStop) => isStop);
-  }
+  // Future<bool> avatarStop(){
+  //   return _channel
+  //       .invokeMethod('avatarStop')
+  //       .then<bool>((isStop) => isStop);
+  // }
   ///智能机器人动作
   ///action 具体的动作名称，传入的参数为AvatarAction类中的常量值
   Future<bool> avatarActions({String action = AvatarAction.INTERACTION}){

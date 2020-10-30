@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -173,6 +174,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     mPermissionList.add(permissions[i]);
                 }
             }
+            /*
             if (!mPermissionList.isEmpty()) {
                 Toast.makeText(mContext, "正在请求权限", Toast.LENGTH_SHORT).show();
                 String[] mPermissions = mPermissionList.toArray(new String[mPermissionList.size()]);
@@ -181,11 +183,31 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                 isCheckPermission = true;
                 avatarManagerInit();
             }
+*/
+            //android 6.0以上需要动态申请权限
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                int writePermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                int readPermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE);
+                int internetPermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.INTERNET);
+                int accessNetStatePermission = ContextCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_NETWORK_STATE);
+                if (writePermission != PackageManager.PERMISSION_GRANTED || readPermission != PackageManager.PERMISSION_GRANTED ||
+                        internetPermission != PackageManager.PERMISSION_GRANTED || accessNetStatePermission != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(activity, permissions, REQUEST_CODE_PERMISSION);
+                    Log.e("requestPermissions ===>",permissions.length+"");
+                } else {
+                    isCheckPermission = true;
+                    avatarManagerInit();
+                    Log.e("requestPermissions ===>","isCheckPermission = true");
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             isInit = false;
         }
     }
+
+    private AvatarManagerHelper.AvatarEventListen mAvatarEventListen;
 
     private void avatarManagerInit() {
         if (isCheckPermission && isInit) {
@@ -194,115 +216,119 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         }
         mAvatarMgr = new AvatarManagerHelper(activity);
 //        mAvatarMgr.UnInitialize();
-        mAvatarMgr.Initialize(mAvatarPosLeft, mAvatarPosTop, mAvatarSize, 0);
-        mAvatarMgr.setEventListener(new AvatarManagerHelper.AvatarEventListen() {
-            @Override
-            public void onEvent(final String strJson) {
-                Log.e("FlutterAvatarPlugin onEvent====>", strJson);
-                /**
-                 * {
-                 * "head": { //事件头
-                 * "name": "Event4AuthorizationInfo", //事件名称，区分不同的事件
-                 * "time": "2019-04-29 09:52:49", //事件产生时间
-                 * "ver": "I.001" //事件信息格式版本号，目前统一为 I.001
-                 * },
-                 * "body": { //事件体
-                 * "xxxxx": "xxxx", //事件体字段，根据事件名称定义具体内容
-                 * } }
-                 */
-                JSONObject jsonObject = null;
-                JSONObject jsonObjectEvent = null;
-                JSONObject jsonObjectBody = null;
-                try {
-                    jsonObject = new JSONObject(strJson);
-                    String eventNameJsonStr = jsonObject.getString("head");
-                    String bodyJsonStr = jsonObject.getString("body");
-                    jsonObjectEvent = new JSONObject(eventNameJsonStr);
-                    jsonObjectBody = new JSONObject(bodyJsonStr);
-                    String eventName = jsonObjectEvent.getString("name");
-                    if ("Event4ModuleLoaded".equals(eventName)) {
-                        //{"body":{"curModule":"AVATAR","curStatus":"1","curSubmodule":"BODY","failed":"0","progress":"100"},"head":{"name":"Event4ModuleLoaded","time":"2020-09-22 13:35:47","ver":"I.001"}}
-                        //启动事件监听
-                        String progress = jsonObjectBody.getString("progress");
-                        if (Integer.parseInt(progress) == 100) {
-                            final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"0\",\"failedMsg\":\"\",\"progress\":\"100\"}";
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    eventSink.success(initResult);
-                                    eventSink.endOfStream();
-                                    Toast.makeText(mContext, "虚拟机器人初始化完成", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            isInit = true;
-                            isInitializing = false;
-                        } else {
-                            isInitializing = true;
-                        }
-                    } else if ("Event4VoiceParsed".equals(eventName)) {
-                        // {"body":{"domain":"Chat","intent":"FreeTalk","orgtext":"嗯","param":"这样对话就不能友好进行下去了……"},"head":{"name":"Event4VoiceParsed","time":"2020-09-22 13:41:18","ver":"I.001"}}
-                        //语音转文字监听
-                        String orgtext = jsonObjectBody.getString("orgtext");
-                        String param = jsonObjectBody.getString("param");
-                        Map event4VoiceParseMap = new HashMap<String, String>();
-                        event4VoiceParseMap.put(Constants.Event4VoiceParsed_ORGTEXT_KEY, orgtext);
-                        event4VoiceParseMap.put(Constants.Event4VoiceParsed_PARAM_KEY, param);
-                        final String result = JSON.toJSONString(event4VoiceParseMap);
-                        Log.e("FlutterAvatarPlugin event4VoicePars ====>", result);
-                        if (!orgtext.isEmpty() && !param.isEmpty()) {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (eventSink != null){
-                                        eventSink.success(result);
-                                        eventSink.endOfStream();
-                                    }
-                                }
-                            });
-                        } else {
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (eventSink != null){
-                                        eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
-                                        eventSink.endOfStream();
-                                    }
-                                }
-                            });
-                        }
-                    }else if ("Event4AuthorizationInfo".equals(eventName)){
-                        // {"body":{"authorInfo":"Authorization from Cloud...FAILED && Authorization from license file: FAILED","authorResult":"FAILED","productSN":"2E8AF13B-8D87-523B-99D1-0B1F61C9C353"},"head":{"name":"Event4AuthorizationInfo","time":"2020-10-20 14:36:37","ver":"I.001"}}
-                        String authorResult = jsonObjectBody.getString("authorResult");
-                        if ("FAILED".equals(authorResult)) {
-                            isInit = false;
-                            isInitializing = false;
-                            final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"100\",\"failedMsg\":\"初始化异常，请检查是否安装智能机器人app\",\"progress\":\"0\"}";
-                            activity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (eventSink != null){
+        mAvatarMgr.Initialize(mAvatarPosLeft, mAvatarPosTop, mAvatarSize, 1);
+        if (mAvatarEventListen == null) {
+            mAvatarEventListen = new AvatarManagerHelper.AvatarEventListen() {
+                @Override
+                public void onEvent(final String strJson) {
+                    Log.e("FlutterAvatarPlugin onEvent====>", strJson);
+                    /**
+                     * {
+                     * "head": { //事件头
+                     * "name": "Event4AuthorizationInfo", //事件名称，区分不同的事件
+                     * "time": "2019-04-29 09:52:49", //事件产生时间
+                     * "ver": "I.001" //事件信息格式版本号，目前统一为 I.001
+                     * },
+                     * "body": { //事件体
+                     * "xxxxx": "xxxx", //事件体字段，根据事件名称定义具体内容
+                     * } }
+                     */
+                    JSONObject jsonObject = null;
+                    JSONObject jsonObjectEvent = null;
+                    JSONObject jsonObjectBody = null;
+                    try {
+                        jsonObject = new JSONObject(strJson);
+                        String eventNameJsonStr = jsonObject.getString("head");
+                        String bodyJsonStr = jsonObject.getString("body");
+                        jsonObjectEvent = new JSONObject(eventNameJsonStr);
+                        jsonObjectBody = new JSONObject(bodyJsonStr);
+                        String eventName = jsonObjectEvent.getString("name");
+                        if ("Event4ModuleLoaded".equals(eventName)) {
+                            //{"body":{"curModule":"AVATAR","curStatus":"1","curSubmodule":"BODY","failed":"0","progress":"100"},"head":{"name":"Event4ModuleLoaded","time":"2020-09-22 13:35:47","ver":"I.001"}}
+                            //启动事件监听
+                            String progress = jsonObjectBody.getString("progress");
+                            if (Integer.parseInt(progress) == 100) {
+                                final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"0\",\"failedMsg\":\"\",\"progress\":\"100\"}";
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
                                         eventSink.success(initResult);
                                         eventSink.endOfStream();
+                                        Toast.makeText(mContext, "虚拟机器人初始化完成", Toast.LENGTH_SHORT).show();
                                     }
-                                    unInitialize();
-                                }
-                            });
+                                });
+                                isInit = true;
+                                isInitializing = false;
+                            } else {
+                                isInitializing = true;
+                            }
+                        } else if ("Event4VoiceParsed".equals(eventName)) {
+                            // {"body":{"domain":"Chat","intent":"FreeTalk","orgtext":"嗯","param":"这样对话就不能友好进行下去了……"},"head":{"name":"Event4VoiceParsed","time":"2020-09-22 13:41:18","ver":"I.001"}}
+                            //语音转文字监听
+                            String orgtext = jsonObjectBody.getString("orgtext");
+                            String param = jsonObjectBody.getString("param");
+                            Map event4VoiceParseMap = new HashMap<String, String>();
+                            event4VoiceParseMap.put(Constants.Event4VoiceParsed_ORGTEXT_KEY, orgtext);
+                            event4VoiceParseMap.put(Constants.Event4VoiceParsed_PARAM_KEY, param);
+                            final String result = JSON.toJSONString(event4VoiceParseMap);
+                            Log.e("FlutterAvatarPlugin event4VoicePars ====>", result);
+                            if (!orgtext.isEmpty() && !param.isEmpty()) {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (eventSink != null) {
+                                            eventSink.success(result);
+                                            eventSink.endOfStream();
+                                        }
+                                    }
+                                });
+                            } else {
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (eventSink != null) {
+                                            eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
+                                            eventSink.endOfStream();
+                                        }
+                                    }
+                                });
+                            }
+                        } else if ("Event4AuthorizationInfo".equals(eventName)) {
+                            // {"body":{"authorInfo":"Authorization from Cloud...FAILED && Authorization from license file: FAILED","authorResult":"FAILED","productSN":"2E8AF13B-8D87-523B-99D1-0B1F61C9C353"},"head":{"name":"Event4AuthorizationInfo","time":"2020-10-20 14:36:37","ver":"I.001"}}
+                            String authorResult = jsonObjectBody.getString("authorResult");
+                            if ("FAILED".equals(authorResult)) {
+                                isInit = false;
+                                isInitializing = false;
+                                final String initResult = "{\"curModule\":\"AVATAR\",\"curStatus\":\"1\",\"curSubmodule\":\"BODY\",\"failed\":\"100\",\"failedMsg\":\"初始化异常，请检查是否安装智能机器人app\",\"progress\":\"0\"}";
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (eventSink != null) {
+                                            eventSink.success(initResult);
+                                            eventSink.endOfStream();
+                                        }
+                                        unInitialize();
+                                    }
+                                });
 
+                            }
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        isInit = false;
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    isInit = false;
                 }
-            }
-        });
+            };
 
+        }
+        mAvatarMgr.setEventListener(mAvatarEventListen);
     }
 
     //释放资源
     private boolean unInitialize() {
         eventSink = null;
         isInit = false;
+        mAvatarEventListen = null;
         if (mAvatarMgr != null) {
             mAvatarMgr.UnInitialize();
             mAvatarMgr = null;
@@ -463,7 +489,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     @Override
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        Log.e("onRequestPermissionsResult ===>",requestCode+"");
         if (requestCode == REQUEST_CODE_PERMISSION) {
+            /*
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     if (mPermissionList != null) {
@@ -482,6 +510,24 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     initialize();
                     return false;
                 }
+            }
+            */
+
+            boolean isPermissionGranted = (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE) && grantResults[0]
+                    == PackageManager.PERMISSION_GRANTED) &&
+                    (permissions[2].equals(Manifest.permission.INTERNET) && grantResults[2]
+                            == PackageManager.PERMISSION_GRANTED
+                    ) && permissions[3].equals(Manifest.permission.ACCESS_NETWORK_STATE) && grantResults[3] == PackageManager.PERMISSION_GRANTED;
+            Log.e("onRequestPermissionsResult ===>",isPermissionGranted+"");
+            if (isPermissionGranted){
+                isCheckPermission= true;
+                avatarManagerInit();
+            }else {
+                Toast.makeText(mContext, "虚拟人运行需要获得指定的全部权限", Toast.LENGTH_SHORT).show();
+                isCheckPermission = false;
+                isInit = false;
+                //重现申请权限
+                initialize();
             }
         }
         return false;
