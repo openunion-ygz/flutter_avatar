@@ -27,8 +27,9 @@ public class ExpressionUtils {
         }
 
     }
+
     //根据表情名称获取指定表情实体
-    public static AvatarManagerHelper.Emotion77 getEmotion(String emotionStr){
+    public static AvatarManagerHelper.Emotion77 getEmotion(String emotionStr) {
         switch (emotionStr) {
             case "CALM":
                 return AvatarManagerHelper.Emotion77.CALM;

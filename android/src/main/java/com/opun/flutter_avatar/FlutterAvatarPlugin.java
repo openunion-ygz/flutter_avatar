@@ -84,6 +84,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
+        binding.addRequestPermissionsResultListener(this);
     }
 
     @Override
@@ -133,6 +134,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     private void setActivity(Registrar registrar) {
         this.activity = registrar.activity();
         this.mContext = registrar.context();
+        registrar.addRequestPermissionsResultListener(this);
     }
 
     @Override
@@ -148,9 +150,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         } else if (call.method.equals("unInitialize")) {
             result.success(unInitialize());
         } else if (call.method.equals("avatarStart")) {
-            result.success(avatarStart());
+//            result.success(avatarStart());
         } else if (call.method.equals("avatarStop")) {
-            result.success(avatarStop());
+//            result.success(avatarStop());
         } else if (call.method.equals("avatarActions")) {
             result.success(avatarActions(call));
         } else if (call.method.equals("avatarExpression")) {
@@ -165,7 +167,8 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             result.success(avatarSpeak(call));
         } else if (call.method.equals("avatarSwitchDragMode")) {
             result.success(avatarSwitchDragMode(call));
-        } else {
+        }
+        else {
             result.notImplemented();
         }
     }
@@ -498,12 +501,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             return false;
         }
     }
-
     @Override
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         Log.e("onRequestPermissionsResult ===>", requestCode + "");
         if (requestCode == REQUEST_CODE_PERMISSION) {
-            /*
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
                     if (mPermissionList != null) {
@@ -523,7 +524,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     return false;
                 }
             }
-            */
 
             boolean isPermissionGranted = (permissions[0].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE) && grantResults[0]
                     == PackageManager.PERMISSION_GRANTED) &&
