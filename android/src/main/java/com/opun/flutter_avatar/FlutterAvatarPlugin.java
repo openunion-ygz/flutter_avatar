@@ -80,6 +80,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         eventChannel.setStreamHandler(streamHandler);
     }
 
+    // flutter sdk >= 1.12.x 执行的插件加载方法
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         activity = binding.getActivity();
@@ -100,6 +101,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     }
 
+    // flutter sdk < 1.12.x 执行的插件加载方法
     public static void registerWith(Registrar registrar) {
 //        mRegistrar = registrar;
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "flutter_avatar");
@@ -123,11 +125,12 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
 //        mContext = registrar.activeContext();
 //        activity = registrar.activity();
-        if (registrar.activeContext() instanceof Activity){
+        if (registrar.activeContext() instanceof Activity) {
             plugin.setActivity(registrar);
         }
     }
-    private void setActivity(Registrar registrar){
+
+    private void setActivity(Registrar registrar) {
         this.activity = registrar.activity();
         this.mContext = registrar.context();
     }
@@ -202,11 +205,11 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                         internetPermission != PackageManager.PERMISSION_GRANTED || accessNetStatePermission != PackageManager.PERMISSION_GRANTED) {
                     String[] mPermissions = mPermissionList.toArray(new String[mPermissionList.size()]);
                     ActivityCompat.requestPermissions(activity, mPermissions, REQUEST_CODE_PERMISSION);
-                    Log.e("requestPermissions ===>",mPermissions.length+"");
+                    Log.e("requestPermissions ===>", mPermissions.length + "");
                 } else {
                     isCheckPermission = true;
                     avatarManagerInit();
-                    Log.e("requestPermissions ===>","isCheckPermission = true");
+                    Log.e("requestPermissions ===>", "isCheckPermission = true");
                 }
             }
 
@@ -498,7 +501,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     @Override
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.e("onRequestPermissionsResult ===>",requestCode+"");
+        Log.e("onRequestPermissionsResult ===>", requestCode + "");
         if (requestCode == REQUEST_CODE_PERMISSION) {
             /*
             for (int i = 0; i < grantResults.length; i++) {
@@ -527,11 +530,11 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     (permissions[2].equals(Manifest.permission.INTERNET) && grantResults[2]
                             == PackageManager.PERMISSION_GRANTED
                     ) && permissions[3].equals(Manifest.permission.ACCESS_NETWORK_STATE) && grantResults[3] == PackageManager.PERMISSION_GRANTED;
-            Log.e("onRequestPermissionsResult ===>",isPermissionGranted+"");
-            if (isPermissionGranted){
-                isCheckPermission= true;
+            Log.e("onRequestPermissionsResult ===>", isPermissionGranted + "");
+            if (isPermissionGranted) {
+                isCheckPermission = true;
                 avatarManagerInit();
-            }else {
+            } else {
                 Toast.makeText(mContext, "虚拟人运行需要获得指定的全部权限", Toast.LENGTH_SHORT).show();
                 isCheckPermission = false;
                 isInit = false;
