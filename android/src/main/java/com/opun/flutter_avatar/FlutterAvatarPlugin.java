@@ -47,7 +47,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
     private boolean isCheckPermission = false;
     private List<String> mPermissionList;
     private AvatarManagerHelper mAvatarMgr;
-    private static Context mContext;
+    private Context mContext;
     private Activity activity;
     public static final int REQUEST_CODE_PERMISSION = 10011;
     private boolean isInit = false;
@@ -121,14 +121,15 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
         };
         eventChannel.setStreamHandler(streamHandler);
         //*****插件的使用场景不一样，入口也对应不一样，因此mContext对象的获取需要在所有入口都获取，才能保证mContext不为null****
-        mContext = registrar.activeContext();
+//        mContext = registrar.activeContext();
 //        activity = registrar.activity();
         if (registrar.activeContext() instanceof Activity){
-            plugin.setActivity(registrar.activity());
+            plugin.setActivity(registrar);
         }
     }
-    private void setActivity(Activity activity){
-        this.activity = activity;
+    private void setActivity(Registrar registrar){
+        this.activity = registrar.activity();
+        this.mContext = registrar.context();
     }
 
     @Override
