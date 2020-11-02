@@ -17,6 +17,10 @@
     初始化方法，改方法主要进行资源的初始化：必要权限的申请，以及插件资源的加载 初始化等，推荐程序开始的时候进行初始化，同时，该方法
 
     是其他方法正常调用的前提，必须首先调用该方法。
+    
+    在调用该方法之前，需要首先申请权限：android.permission.INTERNET android.permission.WRITE_EXTERNAL_STORAGE android.permission.READ_EXTERNAL_STORAGE 
+    
+    android.permission.ACCESS_NETWORK_STATE 必须保证权限申请成功之后，再调用initAvatar()方法进行机器人的初始化操作。
 
 3.unInitialize():
 
@@ -34,38 +38,30 @@
 
     初始化的进度
 
-5.avatarStart():
-
-    唤醒/显示智能机器人
-
-6.avatarStop():
-
-    休眠/隐藏智能机器人
-
-7.avatarActions():
+5.avatarActions():
 
     智能机器人动作控制
 
-8.avatarExpression():
+6.avatarExpression():
 
     智能机器人表情控制
 
-9.avatarSpeechMouth():
+7.avatarSpeechMouth():
 
     智能机器人张嘴/合嘴动作
 
-10.avatarTowardTo():
+8.avatarTowardTo():
 
     改变智能机器人脸部朝向
 
-11.avatarChangePos():
+9.avatarChangePos():
 
     改变智能机器人在屏幕的位置
 
-12.avatarSpeak():
+10.avatarSpeak():
 
     控制智能机器人说话
 
-13.avatarSwitchDragMode():
+11.avatarSwitchDragMode():
 
     允许智能机器人在手机屏幕拖拽（默认不允许拖拽）
