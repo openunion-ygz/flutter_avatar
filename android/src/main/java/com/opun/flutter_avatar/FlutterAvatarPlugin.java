@@ -38,10 +38,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
  * FlutterAvatarPlugin
  */
 public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, MethodCallHandler, PluginRegistry.RequestPermissionsResultListener {
-    /// The MethodChannel that will the communication between Flutter and native Android
-    ///
-    /// This local reference serves to register the plugin with the Flutter Engine and unregister it
-    /// when the Flutter Engine is detached from the Activity
     private MethodChannel channel;
     private static EventChannel.EventSink eventSink;
     private boolean isCheckPermission = false;
@@ -167,8 +163,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             result.success(avatarSpeak(call));
         } else if (call.method.equals("avatarSwitchDragMode")) {
             result.success(avatarSwitchDragMode(call));
-        }
-        else {
+        } else {
             result.notImplemented();
         }
     }
@@ -208,11 +203,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                         internetPermission != PackageManager.PERMISSION_GRANTED || accessNetStatePermission != PackageManager.PERMISSION_GRANTED) {
                     String[] mPermissions = mPermissionList.toArray(new String[mPermissionList.size()]);
                     ActivityCompat.requestPermissions(activity, mPermissions, REQUEST_CODE_PERMISSION);
-                    Log.e("requestPermissions ===>", mPermissions.length + "");
                 } else {
                     isCheckPermission = true;
                     avatarManagerInit();
-                    Log.e("requestPermissions ===>", "isCheckPermission = true");
                 }
             }
 
@@ -254,7 +247,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     try {
                         jsonObject = new JSONObject(strJson);
                         String eventNameJsonStr = jsonObject.getString("head");
-                        String bodyJsonStr = jsonObject.getString("body");
+                        final String bodyJsonStr = jsonObject.getString("body");
                         jsonObjectEvent = new JSONObject(eventNameJsonStr);
                         jsonObjectBody = new JSONObject(bodyJsonStr);
                         String eventName = jsonObjectEvent.getString("name");
@@ -268,7 +261,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                     @Override
                                     public void run() {
                                         eventSink.success(initResult);
-                                        eventSink.endOfStream();
+//                                        eventSink.endOfStream();
                                         Toast.makeText(mContext, "虚拟机器人初始化完成", Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -276,6 +269,13 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                 isInitializing = false;
                             } else {
                                 isInitializing = true;
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        eventSink.success(bodyJsonStr);
+//                                        eventSink.endOfStream();
+                                    }
+                                });
                             }
                         } else if ("Event4VoiceParsed".equals(eventName)) {
                             // {"body":{"domain":"Chat","intent":"FreeTalk","orgtext":"嗯","param":"这样对话就不能友好进行下去了……"},"head":{"name":"Event4VoiceParsed","time":"2020-09-22 13:41:18","ver":"I.001"}}
@@ -286,28 +286,27 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                             event4VoiceParseMap.put(Constants.Event4VoiceParsed_ORGTEXT_KEY, orgtext);
                             event4VoiceParseMap.put(Constants.Event4VoiceParsed_PARAM_KEY, param);
                             final String result = JSON.toJSONString(event4VoiceParseMap);
-                            Log.e("FlutterAvatarPlugin event4VoicePars ====>", result);
-                            if (!orgtext.isEmpty() && !param.isEmpty()) {
-                                activity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (eventSink != null) {
-                                            eventSink.success(result);
-                                            eventSink.endOfStream();
-                                        }
+//                            if (!orgtext.isEmpty() && !param.isEmpty()) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (eventSink != null) {
+                                        eventSink.success(result);
+//                                            eventSink.endOfStream();
                                     }
-                                });
-                            } else {
-                                activity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (eventSink != null) {
-                                            eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
-                                            eventSink.endOfStream();
-                                        }
-                                    }
-                                });
-                            }
+                                }
+                            });
+//                            } else {
+//                                activity.runOnUiThread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        if (eventSink != null) {
+//                                            eventSink.error("500", "Event4VoiceParsed Error", "语音转义异常");
+//                                            eventSink.endOfStream();
+//                                        }
+//                                    }
+//                                });
+//                            }
                         } else if ("Event4AuthorizationInfo".equals(eventName)) {
                             // {"body":{"authorInfo":"Authorization from Cloud...FAILED && Authorization from license file: FAILED","authorResult":"FAILED","productSN":"2E8AF13B-8D87-523B-99D1-0B1F61C9C353"},"head":{"name":"Event4AuthorizationInfo","time":"2020-10-20 14:36:37","ver":"I.001"}}
                             String authorResult = jsonObjectBody.getString("authorResult");
@@ -320,7 +319,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                     public void run() {
                                         if (eventSink != null) {
                                             eventSink.success(initResult);
-                                            eventSink.endOfStream();
+//                                            eventSink.endOfStream();
                                         }
                                         unInitialize();
                                     }
@@ -341,6 +340,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
 
     //释放资源
     private boolean unInitialize() {
+        if (eventSink != null) {
+            eventSink.endOfStream();
+        }
         eventSink = null;
         isInit = false;
         mAvatarEventListen = null;
@@ -501,9 +503,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             return false;
         }
     }
+
     @Override
     public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        Log.e("onRequestPermissionsResult ===>", requestCode + "");
         if (requestCode == REQUEST_CODE_PERMISSION) {
             for (int i = 0; i < grantResults.length; i++) {
                 if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
@@ -530,7 +532,6 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                     (permissions[2].equals(Manifest.permission.INTERNET) && grantResults[2]
                             == PackageManager.PERMISSION_GRANTED
                     ) && permissions[3].equals(Manifest.permission.ACCESS_NETWORK_STATE) && grantResults[3] == PackageManager.PERMISSION_GRANTED;
-            Log.e("onRequestPermissionsResult ===>", isPermissionGranted + "");
             if (isPermissionGranted) {
                 isCheckPermission = true;
                 avatarManagerInit();

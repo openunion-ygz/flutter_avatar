@@ -22,15 +22,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // initAvatar();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initAvatar() async {
-    FlutterAvatar.instance.initAvatar('20', '20',iAvatarSize: '400');
-    FlutterAvatar.avatarListener((data) {
-      print('avatarListener ===>$data');
-    });
   }
 
   @override
