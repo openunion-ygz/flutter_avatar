@@ -18,9 +18,9 @@
 
     是其他方法正常调用的前提，必须首先调用该方法。
     
-    在调用该方法之前，需要首先申请权限：android.permission.INTERNET android.permission.WRITE_EXTERNAL_STORAGE android.permission.READ_EXTERNAL_STORAGE 
+    需要首先申请权限：android.permission.INTERNET android.permission.WRITE_EXTERNAL_STORAGE android.permission.READ_EXTERNAL_STORAGE
     
-    android.permission.ACCESS_NETWORK_STATE 必须保证权限申请成功之后，再调用initAvatar()方法进行机器人的初始化操作。
+    android.permission.ACCESS_NETWORK_STATE initAvatar()方法要求必须所列举的权限申请通过之后，才能正常初始化。
 
 3.unInitialize():
 
