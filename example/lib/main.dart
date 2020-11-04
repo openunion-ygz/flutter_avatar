@@ -131,7 +131,7 @@ class _MyAppState extends State<MyApp> {
           RaisedButton(
             child:Text('初始化'),
             onPressed: (){
-              FlutterAvatar.instance.initAvatar('20', '20',iAvatarSize: '400');
+              FlutterAvatar.instance.initAvatar('640', '20',iAvatarSize: '400');
               FlutterAvatar.avatarListener((data) {
                 print('avatarListener ===>$data');
                 setState(() {

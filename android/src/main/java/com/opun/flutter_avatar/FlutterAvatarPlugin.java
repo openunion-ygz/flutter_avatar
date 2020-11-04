@@ -223,7 +223,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             return;
         }
         mAvatarMgr = new AvatarManagerHelper(activity);
-//        mAvatarMgr.UnInitialize();
+        mAvatarMgr.UnInitialize();
         mAvatarMgr.Initialize(mAvatarPosLeft, mAvatarPosTop, mAvatarSize, 1);
         if (mAvatarEventListen == null) {
             mAvatarEventListen = new AvatarManagerHelper.AvatarEventListen() {
