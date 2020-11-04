@@ -222,7 +222,7 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             Toast.makeText(mContext, "初始化已完成", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (mAvatarMgr == null){
+        if (mAvatarMgr == null) {
             mAvatarMgr = new AvatarManagerHelper(activity);
         }
         mAvatarMgr.UnInitialize();
@@ -262,8 +262,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        eventSink.success(initResult);
+                                        if (eventSink != null) {
+                                            eventSink.success(initResult);
 //                                        eventSink.endOfStream();
+                                        }
                                         Toast.makeText(mContext, "虚拟机器人初始化完成", Toast.LENGTH_SHORT).show();
                                     }
                                 });
@@ -274,8 +276,10 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
                                 activity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        eventSink.success(bodyJsonStr);
+                                        if (eventSink != null){
+                                            eventSink.success(bodyJsonStr);
 //                                        eventSink.endOfStream();
+                                        }
                                     }
                                 });
                             }
