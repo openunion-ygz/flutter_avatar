@@ -222,7 +222,9 @@ public class FlutterAvatarPlugin implements FlutterPlugin, ActivityAware, Method
             Toast.makeText(mContext, "初始化已完成", Toast.LENGTH_SHORT).show();
             return;
         }
-        mAvatarMgr = new AvatarManagerHelper(activity);
+        if (mAvatarMgr == null){
+            mAvatarMgr = new AvatarManagerHelper(activity);
+        }
         mAvatarMgr.UnInitialize();
         mAvatarMgr.Initialize(mAvatarPosLeft, mAvatarPosTop, mAvatarSize, 1);
         if (mAvatarEventListen == null) {
