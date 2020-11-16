@@ -35,6 +35,7 @@ android {
 
     dependencies {
         implementation fileTree(dir: 'libs', include: ['*.jar','*.aar'])
-        implementation 'com.alibaba:fastjson:1.2.31'
+        //provided(android studio 2.x) 或者compileOnly(android studio 3.x)只提供编译支持，但是不会写入apk。使用provide可以避免支持包版本冲突和重复打包导致安装包体积徒增。
+        compileOnly 'com.alibaba:fastjson:1.2.31'
     }
 }
